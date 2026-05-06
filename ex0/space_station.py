@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 # from pydantic import ValidatorError
 
 
@@ -27,3 +27,5 @@ if __name__ == "__main__":
 
     print(valid_station.crew)
     
+    #@model_validator(mode=’after’)
+    #Field(...)
