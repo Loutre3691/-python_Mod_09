@@ -44,7 +44,7 @@ class AlienContact(BaseModel):
     def display(self) -> None:
         print(f"""Valid contact report:
             ID: {self.contact_id}
-            Type: {self.contact_type}
+            Type: {self.contact_type.name}
             Location: {self.location}
             Signal: {self.signal_strength}/10
             Duration: {self.duration_minutes} minutes
