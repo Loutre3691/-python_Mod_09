@@ -37,14 +37,14 @@ class SpaceMission(BaseModel):
         if not self.mission_id.startswith("M"):
             raise ValueError('Mission ID must start with "M"')
         
-        if not any(Rank.captain in grad or Rank.commander in grad for grad in self.crew):
+        if not any(grad.rank == Rank.captain  or grad.rank == Rank.commander for grad in self.crew):
             raise ValueError("Must have at least one Commander or Captain")
     
-        # if self.duration_day > 365:
-        #     raise ValueError("Telepathic contact requires at least 3 witnesses")
+        if self.duration_days > 365 and any(grad.years_experience <= 5 for grad in self.crew):
+            raise ValueError("Long missions (> 365 days) need 50% 'experienced crew (5+ years)")
 
-        # if not any(self.is_active in for member in self.crew_list):
-        #     raise ValueError("Strong signals (> 7.0) should include received messages")
+        if not any(grad.is_active != True for grad in self.crew):
+            raise ValueError("All crew members must be active")
  
         return self
     
@@ -71,7 +71,8 @@ def main() -> None:
         rank=Rank.commander,
         age=35,
         specialization="Mission Command",
-        years_experience=10
+        years_experience=10,
+        is_active= False
     ),
     CrewMember(
         member_id="JS002",
@@ -98,12 +99,12 @@ def main() -> None:
         rank=Rank.officer,
         age=35,
         specialization="Mission Command",
-        years_experience=10
+        years_experience=6
     ),
     CrewMember(
         member_id="JS002",
         name="John Smith",
-        rank=Rank.officer,
+        rank=Rank.commander,
         age=28,
         specialization="Navigation",
         years_experience=6
