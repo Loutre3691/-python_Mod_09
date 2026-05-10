@@ -38,12 +38,14 @@ class SpaceMission(BaseModel):
             raise ValueError('Mission ID must start with "M"')
         
         if not any(grad.rank == Rank.captain  or grad.rank == Rank.commander for grad in self.crew):
-            raise ValueError("Must have at least one Commander or Captain")
+            raise ValueError("Mission must have at least one Commander or Captain")
     
-        if self.duration_days > 365 and any(grad.years_experience <= 5 for grad in self.crew):
-            raise ValueError("Long missions (> 365 days) need 50% 'experienced crew (5+ years)")
+        if self.duration_days > 365:
+            experienced = [m for m in self.crew if m.years_experience >= 5]
+            if len(experienced) / len(self.crew) < 0.5:
+                raise ValueError("Long missions (> 365 days) need 50% 'experienced crew (5+ years)")
 
-        if not any(grad.is_active != True for grad in self.crew):
+        if not all(grad.is_active for grad in self.crew):
             raise ValueError("All crew members must be active")
  
         return self
@@ -55,10 +57,9 @@ Mission: {self.mission_name}
 ID: {self.mission_id}
 Destination: {self.destination}
 Duration: {self.duration_days} days
-Budget: {self.budget_millions}M
+Budget: ${self.budget_millions}M
 Crew size: {len(self.crew)}
-Crew members:
-        """)
+Crew members:""")
         for member in self.crew:
             print(f" - {member.name} ({member.rank.value})  - {member.specialization}")
    
@@ -72,7 +73,6 @@ def main() -> None:
         age=35,
         specialization="Mission Command",
         years_experience=10,
-        is_active= False
     ),
     CrewMember(
         member_id="JS002",
@@ -104,7 +104,7 @@ def main() -> None:
     CrewMember(
         member_id="JS002",
         name="John Smith",
-        rank=Rank.commander,
+        rank=Rank.officer,
         age=28,
         specialization="Navigation",
         years_experience=6
@@ -134,10 +134,10 @@ def main() -> None:
     
     except ValidationError as e:
         for error in e.errors():
-            print(error["msg"])
+            print(error["msg"].replace("Value error, ", ""))
 
 
-    print("========================================")
+    print("\n========================================")
     print("Excepted validation error:")
 
     try:
@@ -155,7 +155,7 @@ def main() -> None:
     
     except ValidationError as e:
         for error in e.errors():
-            print(error["msg"])
+            print(error["msg"].replace("Value error, ", ""))
 
 
 
