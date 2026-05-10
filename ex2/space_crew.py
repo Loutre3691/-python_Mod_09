@@ -12,7 +12,6 @@ class Rank(Enum):
     
 
 class CrewMember(BaseModel):
-
     member_id: str = Field(min_length=3, max_length=10)
     name: str = Field(min_length=2, max_length=50)
     rank: Rank
@@ -29,7 +28,7 @@ class SpaceMission(BaseModel):
     launch_date : datetime
     duration_days: int = Field(ge=1, le=3650)
     crew: int = Field (ge=1, le=12)
-    crew_list = list
+    crew_list: list[str] = []
     mission_status: str = "planned"
     budget_millions: float = Field(ge=1, le=10000)
 
@@ -39,14 +38,14 @@ class SpaceMission(BaseModel):
         if not self.mission_id.startswith("M"):
             raise ValueError('Mission ID must start with "M"')
         
-        if not any("commander" or "captain" in grad for grad in self.crew_list):
+        if not any("commander" in grad or "captain" in grad for grad in self.crew_list):
             raise ValueError(" Must have at least one Commander or Captain")
     
-        if self.duration_day > 365 and 
-            raise ValueError("Telepathic contact requires at least 3 witnesses")
+        # if self.duration_day > 365 and 
+        #     raise ValueError("Telepathic contact requires at least 3 witnesses")
 
-        if not any(self.is_active in for member in self.crew):
-            raise ValueError("Strong signals (> 7.0) should include received messages")
+        # if not any(self.is_active in for member in self.crew_list):
+        #     raise ValueError("Strong signals (> 7.0) should include received messages")
  
         return self
     
@@ -69,21 +68,25 @@ def main() -> None:
         "John Smith (lieutenant) - Navigation",
         "Alice Johnson (officer) - Engineering"
     ]
+    len_valid_list = len(valid_list)
 
     bad_list = [
         "Sarah Connor (officier) - Mission Command",
         "John Smith (lieutenant) - Navigation",
         "Alice Johnson (officer) - Engineering"
     ]
+    len_bad_list = len(bad_list)
+
     try:
         valid_mission = SpaceMission(
         mission_name="Mars Colony Establishment",
         mission_id="M2024_MARS",
-        Destination="Mars",
+        destination="Mars",
         duration_days=900,
         budget_millions=2500.0,
-        crew=len(valid_list)
-        crew_list=valid_mission
+        crew=len_valid_list,
+        crew_list=valid_list,
+        launch_date=datetime.now()
         )
 
         valid_mission.display()
@@ -100,11 +103,12 @@ def main() -> None:
         false_mission = SpaceMission(
         mission_name="Mars Colony Establishment",
         mission_id="M2024_MARS",
-        Destination="Mars",
+        destination="Mars",
         duration_days=900,
         budget_millions=2500.0,
-        crew=len(bad_list)
-        crew_list=false_mission
+        crew=len_bad_list,
+        crew_list=bad_list,
+        launch_date=datetime.now()
         )
 
         false_mission.display()
