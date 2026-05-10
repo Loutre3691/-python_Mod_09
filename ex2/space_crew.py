@@ -5,7 +5,7 @@ from enum import Enum
 
 class Rank(Enum):
     cadet = "cadet"
-    officier = "officier"
+    officer = "officer"
     lieutenant = "lieutenant"
     captain = "captain"
     commander = "commander"
@@ -27,8 +27,7 @@ class SpaceMission(BaseModel):
     destination: str = Field(min_length=3, max_length=50)
     launch_date : datetime
     duration_days: int = Field(ge=1, le=3650)
-    crew: int = Field (ge=1, le=12)
-    crew_list: list[str] = []
+    crew: list[CrewMember] = Field(min_length=1, max_length=12)
     mission_status: str = "planned"
     budget_millions: float = Field(ge=1, le=10000)
 
@@ -38,10 +37,10 @@ class SpaceMission(BaseModel):
         if not self.mission_id.startswith("M"):
             raise ValueError('Mission ID must start with "M"')
         
-        if not any("commander" in grad or "captain" in grad for grad in self.crew_list):
-            raise ValueError(" Must have at least one Commander or Captain")
+        if not any(Rank.captain in grad or Rank.commander in grad for grad in self.crew):
+            raise ValueError("Must have at least one Commander or Captain")
     
-        # if self.duration_day > 365 and 
+        # if self.duration_day > 365:
         #     raise ValueError("Telepathic contact requires at least 3 witnesses")
 
         # if not any(self.is_active in for member in self.crew_list):
@@ -52,30 +51,72 @@ class SpaceMission(BaseModel):
 
     def display(self) -> None:
         print(f"""Valid mission created:
-            Mission: {self.mission_name}
-            ID: {self.mission_id}
-            Destination: {self.destination}
-            Duration: {self.duration_days} days
-            Budget: {self.budget_millions}M
-            Crew_size: {self.crew}
-            Crew members:
+Mission: {self.mission_name}
+ID: {self.mission_id}
+Destination: {self.destination}
+Duration: {self.duration_days} days
+Budget: {self.budget_millions}M
+Crew size: {len(self.crew)}
+Crew members:
         """)
+        for member in self.crew:
+            print(f" - {member.name} ({member.rank.value})  - {member.specialization}")
    
 
 def main() -> None:
-    valid_list = [
-        "Sarah Connor (commander) - Mission Command",
-        "John Smith (lieutenant) - Navigation",
-        "Alice Johnson (officer) - Engineering"
+    valid_crew = [
+    CrewMember(
+        member_id="SC001",
+        name="Sarah Connor",
+        rank=Rank.commander,
+        age=35,
+        specialization="Mission Command",
+        years_experience=10
+    ),
+    CrewMember(
+        member_id="JS002",
+        name="John Smith",
+        rank=Rank.lieutenant,
+        age=28,
+        specialization="Navigation",
+        years_experience=6
+    ),
+    CrewMember(
+        member_id="AJ003",
+        name="Alice Johnson",
+        rank=Rank.officer,
+        age=30,
+        specialization="Engineering",
+        years_experience=7
+    ),
     ]
-    len_valid_list = len(valid_list)
 
-    bad_list = [
-        "Sarah Connor (officier) - Mission Command",
-        "John Smith (lieutenant) - Navigation",
-        "Alice Johnson (officer) - Engineering"
+    bad_crew = [
+    CrewMember(
+        member_id="SC001",
+        name="Sarah Connor",
+        rank=Rank.officer,
+        age=35,
+        specialization="Mission Command",
+        years_experience=10
+    ),
+    CrewMember(
+        member_id="JS002",
+        name="John Smith",
+        rank=Rank.officer,
+        age=28,
+        specialization="Navigation",
+        years_experience=6
+    ),
+    CrewMember(
+        member_id="AJ003",
+        name="Alice Johnson",
+        rank=Rank.officer,
+        age=30,
+        specialization="Engineering",
+        years_experience=7
+    ),
     ]
-    len_bad_list = len(bad_list)
 
     try:
         valid_mission = SpaceMission(
@@ -84,8 +125,7 @@ def main() -> None:
         destination="Mars",
         duration_days=900,
         budget_millions=2500.0,
-        crew=len_valid_list,
-        crew_list=valid_list,
+        crew=valid_crew,
         launch_date=datetime.now()
         )
 
@@ -106,8 +146,7 @@ def main() -> None:
         destination="Mars",
         duration_days=900,
         budget_millions=2500.0,
-        crew=len_bad_list,
-        crew_list=bad_list,
+        crew=bad_crew,
         launch_date=datetime.now()
         )
 
