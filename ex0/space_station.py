@@ -24,48 +24,49 @@ class SpaceStation(BaseModel):
         Status: {status}
         Notes: {self.notes}""")
 
+
 def main() -> None:
     try:
         valid_station = SpaceStation(
-        station_id="ISS001",
-        name="International Space Station",
-        crew_size=6,
-        power_level=85.5,
-        oxygen_level=92.3,
-        last_maintenance=datetime.now(),
-        is_operational=True,
-        notes="👽 the aliens are here 👽"
+            station_id="ISS001",
+            name="International Space Station",
+            crew_size=6,
+            power_level=85.5,
+            oxygen_level=92.3,
+            last_maintenance=datetime.now(),
+            is_operational=True,
+            notes="👽 the aliens are here 👽"
         )
 
         valid_station.display()
-      
+
     except ValidationError as e:
         for error in e.errors():
-            print(error["msg"])
-    
+            print(error["msg"].replace("Value error, ", ""))
+
     print("\n========================================")
     print("Excepted validation error:")
 
     try:
         false_station = SpaceStation(
-        station_id="ISS001",
-        name="International Space Station",
-        crew_size=21,
-        power_level=80,
-        oxygen_level=120,
-        last_maintenance=datetime.now(),
-        is_operational=True,
-        notes="hello"
+            station_id="ISS001",
+            name="International Space Station",
+            crew_size=21,
+            power_level=80,
+            oxygen_level=120,
+            last_maintenance=datetime.now(),
+            is_operational=True,
+            notes="hello"
         )
 
         false_station.display()
 
     except ValidationError as e:
         for error in e.errors():
-            print(error["msg"])
+            print(error["msg"].replace("Value error, ", ""))
+
 
 if __name__ == "__main__":
     print("Space Station Data Validation\n"
-    "========================================")
-
+          "========================================")
     main()
